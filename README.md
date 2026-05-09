@@ -4,20 +4,31 @@
 
 ## 功能
 
-- 输入 `owner/repo` 后，点击 `Refresh Releases` 拉取 GitHub Release assets。
-- 顶部支持 `Select Folder` 选择下载目录（默认 `当前目录/downloads`）。
+- 使用可输入的 Repo 下拉框（ComboBox），支持最近 10 个仓库历史。
+- 程序启动自动读取 `app_config.ini`，退出自动保存配置。
+- 记住上次 Repo、下载目录、窗口大小。
+- `Refresh Releases` 拉取 GitHub Release assets。
+- `Check Self Update` 检查 `yunfei00/version-download-tool-c` 最新版本。
+- 顶部支持 `Select Folder` 选择下载目录。
 - `Download Selected` 下载选中资产，支持进度、日志、状态同步。
-- `Cancel Download` 可中断下载，状态更新为 `Cancelled`。
-- 文件先写入 `.part`，成功后再重命名；同名文件自动追加 `_1/_2` 避免覆盖。
-- ListView 支持整行选中、网格线、单选，并使用固定列宽。
 
-## 使用说明
+## 配置文件
 
-1. 输入 repo：`owner/repo`
-2. 点击 `Refresh Releases`
-3. 选择 asset
-4. 选择下载目录
-5. 点击 `Download Selected`
+配置文件路径：程序当前目录 `app_config.ini`。
+
+示例：
+
+```ini
+repo=yunfei00/version-download-tool-c
+download_dir=downloads
+window_width=900
+window_height=560
+recent_repo_1=yunfei00/version-download-tool-c
+recent_repo_2=owner/repo
+```
+
+- 文件不存在时使用默认值，并在退出时自动创建。
+- `recent_repo_n` 最多保存 10 条。
 
 ## 构建
 
@@ -25,11 +36,14 @@
 build.bat
 ```
 
+本地构建默认 `BUILD_VERSION="local"`。
+
 ## GitHub Actions / Release
 
 - 工作流：`.github/workflows/build-windows.yml`
 - 使用 `windows-2022` 构建并上传 artifact。
-- tag `v*` 会创建 GitHub Release 并上传 `version-download-tool.exe`。
+- Tag 构建注入 `BUILD_VERSION=tag 名`，普通 push 注入短 SHA。
+- tag `v*` 会用 `softprops/action-gh-release@v3` 创建 Release 并上传 `version-download-tool.exe`。
 
 打 tag 发布：
 
@@ -37,9 +51,3 @@ build.bat
 git tag v0.1.0
 git push origin v0.1.0
 ```
-
-产物会出现在 GitHub Actions **Artifacts** 和 **Releases** 中。
-
-## 截图
-
-- 功能截图占位：`docs/screenshot-placeholder.png`（后续补充真实截图）
