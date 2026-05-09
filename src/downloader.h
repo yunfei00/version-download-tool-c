@@ -3,11 +3,21 @@
 
 #include <windows.h>
 
-typedef struct DownloadTask {
-    HWND hTargetWnd;
-    int rowIndex;
-} DownloadTask;
+#define MAX_RELEASE_ASSETS 256
 
-BOOL downloader_start_mock(HWND hTargetWnd, int rowIndex);
+typedef struct {
+    char version[128];
+    char file_name[260];
+    char size_text[64];
+    char published_at[64];
+    char download_url[1024];
+    DWORD size_bytes;
+    char status[64];
+} ReleaseAsset;
+
+typedef void (*DownloadProgressCallback)(int progress, void* user_data);
+
+BOOL github_fetch_releases(const char* repo, ReleaseAsset* assets, int max_assets, int* out_count, char* error_buf, int error_buf_size);
+BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, void* user_data, char* error_buf, int error_buf_size);
 
 #endif
