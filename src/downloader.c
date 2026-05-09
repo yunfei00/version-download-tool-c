@@ -141,7 +141,7 @@ BOOL github_fetch_releases(const char* repo, ReleaseAsset* assets, int max_asset
     return TRUE;
 }
 
-BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, void* user_data, char* error_buf, int error_buf_size) {
+BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, DownloadCancelCallback cancel_cb, void* user_data, BOOL* was_cancelled, char* error_buf, int error_buf_size) {
     wchar_t wurl[2048];
     swprintf(wurl, 2048, L"%S", url);
     URL_COMPONENTS uc = {0}; wchar_t host[256], path[1600];
@@ -158,18 +158,28 @@ BOOL github_download_file(const char* url, const char* file_path, DWORD expected
         if (r) WinHttpCloseHandle(r); if (c) WinHttpCloseHandle(c); if (s) WinHttpCloseHandle(s); return FALSE;
     }
 
+    if (was_cancelled) *was_cancelled = FALSE;
     FILE* fp = fopen(file_path, "wb");
-    if (!fp) { snprintf(error_buf, error_buf_size, "Failed to open output file."); return FALSE; }
+    if (!fp) { snprintf(error_buf, error_buf_size, "Failed to open output file."); WinHttpCloseHandle(r); WinHttpCloseHandle(c); WinHttpCloseHandle(s); return FALSE; }
     DWORD total = 0;
+    BOOL ok = TRUE;
     while (1) {
-        DWORD avail = 0; if (!WinHttpQueryDataAvailable(r, &avail)) break; if (!avail) break;
+        if (cancel_cb && cancel_cb(user_data)) {
+            if (was_cancelled) *was_cancelled = TRUE;
+            snprintf(error_buf, error_buf_size, "Download cancelled.");
+            ok = FALSE;
+            break;
+        }
+        DWORD avail = 0;
+        if (!WinHttpQueryDataAvailable(r, &avail)) { snprintf(error_buf, error_buf_size, "Read failed: %lu", GetLastError()); ok = FALSE; break; }
+        if (!avail) break;
         BYTE* buf = (BYTE*)malloc(avail); DWORD rd = 0;
-        if (!buf || !WinHttpReadData(r, buf, avail, &rd)) { free(buf); break; }
+        if (!buf || !WinHttpReadData(r, buf, avail, &rd)) { if(buf) free(buf); snprintf(error_buf, error_buf_size, "Read failed: %lu", GetLastError()); ok = FALSE; break; }
         fwrite(buf, 1, rd, fp); free(buf); total += rd;
-        if (progress_cb && expected_size > 0) progress_cb((int)((total * 100ULL) / expected_size), user_data);
+        if (progress_cb && expected_size > 0) progress_cb((int)((total * 100ULL) / expected_size), total, expected_size, user_data);
     }
     fclose(fp);
-    if (progress_cb) progress_cb(100, user_data);
+    if (ok && progress_cb) progress_cb(100, total, expected_size, user_data);
     WinHttpCloseHandle(r); WinHttpCloseHandle(c); WinHttpCloseHandle(s);
-    return TRUE;
+    return ok;
 }
