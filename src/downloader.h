@@ -15,9 +15,10 @@ typedef struct {
     char status[64];
 } ReleaseAsset;
 
-typedef void (*DownloadProgressCallback)(int progress, void* user_data);
+typedef void (*DownloadProgressCallback)(int progress, DWORD total, DWORD expected, void* user_data);
+typedef BOOL (*DownloadCancelCallback)(void* user_data);
 
 BOOL github_fetch_releases(const char* repo, ReleaseAsset* assets, int max_assets, int* out_count, char* error_buf, int error_buf_size);
-BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, void* user_data, char* error_buf, int error_buf_size);
+BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, DownloadCancelCallback cancel_cb, void* user_data, BOOL* was_cancelled, char* error_buf, int error_buf_size);
 
 #endif

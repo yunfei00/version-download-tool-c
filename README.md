@@ -1,55 +1,45 @@
 # Version Download Tool (C Edition)
 
-一个纯 **C + Win32 API** 的轻量级 Windows 版本下载工具示例，不依赖 Qt/.NET/Python，目标产物为单个 `exe`。
+一个纯 **C + Win32 API** 的轻量级 Windows 版本下载工具示例。
 
-## 功能（当前版本）
+## 功能
 
-- 输入 GitHub Repo（`owner/repo`）后，点击 `Refresh Releases` 实时请求：
-  - `https://api.github.com/repos/{owner}/{repo}/releases`
-- 使用 WinHTTP HTTPS GET，请求头包含：
-  - `User-Agent: version-download-tool-c`
-  - `Accept: application/vnd.github+json`
-- 轻量级 JSON 解析并展示 Release 资产（asset）到表格：
-  - Version = `tag_name`
-  - File Name = `assets.name`
-  - Size = 自动格式化为 KB/MB
-  - Published At = `published_at`
-  - Status = `Ready`
-- 支持最多 256 个资产项。
-- `Download Selected` 下载选中资产到当前目录 `downloads/`。
-- 下载和刷新均使用 worker thread，避免 UI 卡死。
-- 下载进度实时更新到底部进度条，并在日志输出开始、路径、完成/失败。
+- 输入 `owner/repo` 后，点击 `Refresh Releases` 拉取 GitHub Release assets。
+- 顶部支持 `Select Folder` 选择下载目录（默认 `当前目录/downloads`）。
+- `Download Selected` 下载选中资产，支持进度、日志、状态同步。
+- `Cancel Download` 可中断下载，状态更新为 `Cancelled`。
+- 文件先写入 `.part`，成功后再重命名；同名文件自动追加 `_1/_2` 避免覆盖。
+- ListView 支持整行选中、网格线、单选，并使用固定列宽。
 
-## 本地构建（MinGW-w64）
+## 使用说明
 
-```bash
-gcc src/main.c src/app.c src/downloader.c resources/app.rc -o version-download-tool.exe -mwindows -lcomctl32 -lwinhttp
-```
+1. 输入 repo：`owner/repo`
+2. 点击 `Refresh Releases`
+3. 选择 asset
+4. 选择下载目录
+5. 点击 `Download Selected`
 
-或在 Windows CMD 中执行：
+## 构建
 
 ```bat
 build.bat
 ```
 
-## GitHub Actions 打包
+## GitHub Actions / Release
 
-工作流文件：`.github/workflows/build-windows.yml`
+- 工作流：`.github/workflows/build-windows.yml`
+- 使用 `windows-2022` 构建并上传 artifact。
+- tag `v*` 会创建 GitHub Release 并上传 `version-download-tool.exe`。
 
-- 运行环境：`windows-2022`
-- 使用 MinGW-w64 编译可执行文件
-- 上传 `version-download-tool.exe` 为 artifact
-- 当触发 tag（`v*`）时，自动创建 GitHub Release 并附带 exe
+打 tag 发布：
 
-## 代码结构
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
 
-- `src/app.c`：GUI、布局、消息循环、线程启动、表格和日志更新
-- `src/downloader.c`：GitHub Releases 拉取、JSON 字段提取、文件下载
-- `src/downloader.h`：`ReleaseAsset` 结构和下载/拉取接口
+产物会出现在 GitHub Actions **Artifacts** 和 **Releases** 中。
 
-## 错误处理
+## 截图
 
-- Repo 格式错误：`Invalid repo format. Expected owner/repo.`
-- 无可用资产：`No release assets found.`
-- 下载未选中行：`Please select a release asset first.`
-- HTTP/Win32 错误会输出到日志框
+- 功能截图占位：`docs/screenshot-placeholder.png`（后续补充真实截图）

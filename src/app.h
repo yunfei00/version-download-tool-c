@@ -6,8 +6,8 @@
 #include "downloader.h"
 
 #define APP_TITLE "Version Download Tool - C Edition"
-#define APP_WIDTH 900
-#define APP_HEIGHT 560
+#define APP_WIDTH 1080
+#define APP_HEIGHT 640
 
 #define WM_APP_DOWNLOAD_PROGRESS (WM_APP + 1)
 #define WM_APP_DOWNLOAD_COMPLETE (WM_APP + 2)
@@ -17,6 +17,9 @@ typedef enum ControlId {
     IDC_EDIT_REPO = 1001,
     IDC_BTN_REFRESH,
     IDC_BTN_DOWNLOAD,
+    IDC_BTN_SELECT_FOLDER,
+    IDC_BTN_CANCEL_DOWNLOAD,
+    IDC_EDIT_FOLDER,
     IDC_LIST_RELEASES,
     IDC_PROGRESS_DOWNLOAD,
     IDC_EDIT_LOG
@@ -28,11 +31,16 @@ typedef struct AppContext {
     HWND hRepoEdit;
     HWND hRefreshBtn;
     HWND hDownloadBtn;
+    HWND hSelectFolderBtn;
+    HWND hCancelBtn;
+    HWND hFolderEdit;
     HWND hListView;
     HWND hProgress;
     HWND hLogEdit;
-    BOOL downloading;
-    BOOL refreshing;
+    volatile LONG downloading;
+    volatile LONG refreshing;
+    volatile LONG cancel_download;
+    char download_dir[MAX_PATH];
     ReleaseAsset assets[MAX_RELEASE_ASSETS];
     int asset_count;
 } AppContext;
