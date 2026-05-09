@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <commctrl.h>
+#include "downloader.h"
 
 #define APP_TITLE "Version Download Tool - C Edition"
 #define APP_WIDTH 900
@@ -10,6 +11,7 @@
 
 #define WM_APP_DOWNLOAD_PROGRESS (WM_APP + 1)
 #define WM_APP_DOWNLOAD_COMPLETE (WM_APP + 2)
+#define WM_APP_REFRESH_COMPLETE (WM_APP + 3)
 
 typedef enum ControlId {
     IDC_EDIT_REPO = 1001,
@@ -30,14 +32,14 @@ typedef struct AppContext {
     HWND hProgress;
     HWND hLogEdit;
     BOOL downloading;
+    BOOL refreshing;
+    ReleaseAsset assets[MAX_RELEASE_ASSETS];
+    int asset_count;
 } AppContext;
 
 BOOL app_init(HINSTANCE hInstance, int nCmdShow);
 void app_log(AppContext* ctx, const char* fmt, ...);
 void app_clear_releases(AppContext* ctx);
-void app_load_mock_releases(AppContext* ctx);
-void app_add_release_row(AppContext* ctx, int no, const char* version, const char* fileName,
-                         const char* size, const char* publishedAt, const char* status);
-void app_set_selected_status(AppContext* ctx, const char* status);
+void app_add_release_row(AppContext* ctx, int no, const ReleaseAsset* asset);
 
 #endif
