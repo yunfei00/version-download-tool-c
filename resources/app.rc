@@ -1,0 +1,22 @@
+#include <windows.h>
+
+1 VERSIONINFO
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
+FILEOS 0x40004L
+FILETYPE 0x1L
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904E4"
+    {
+      VALUE "CompanyName", "version-download-tool-c\0"
+      VALUE "FileDescription", "Version Download Tool - C Edition\0"
+      VALUE "FileVersion", "0.1.0\0"
+      VALUE "InternalName", "version-download-tool\0"
+      VALUE "OriginalFilename", "version-download-tool.exe\0"
+      VALUE "ProductName", "Version Download Tool - C Edition\0"
+      VALUE "ProductVersion", "0.1.0\0"
+    }
+  }
+}
