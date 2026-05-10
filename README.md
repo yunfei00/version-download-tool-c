@@ -42,6 +42,7 @@ build.bat
 
 - 工作流：`.github/workflows/build-windows.yml`
 - 使用 `windows-2022` 构建并上传 artifact。
+- 当前使用 **MSYS2 + UCRT64 GCC**（`msys2/setup-msys2@v2`）。
 - Tag 构建注入 `BUILD_VERSION=tag 名`，普通 push 注入短 SHA。
 - tag `v*` 会用 `softprops/action-gh-release@v3` 创建 Release 并上传 `version-download-tool.exe`。
 

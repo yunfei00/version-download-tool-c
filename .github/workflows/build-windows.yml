@@ -15,19 +15,37 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
-      - name: Setup MinGW
-        uses: egor-tensin/setup-mingw@v2
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-make
+
       - name: Set build version
         shell: bash
         run: |
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "BUILD_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+            echo "BUILD_VERSION=${GITHUB_REF_NAME}" >> "$GITHUB_ENV"
           else
-            echo "BUILD_VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
+            echo "BUILD_VERSION=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
           fi
+
       - name: Build
-        shell: cmd
-        run: gcc src\main.c src\app.c src\downloader.c src\config.c resources\app.rc -o version-download-tool.exe -mwindows -lcomctl32 -lwinhttp -D BUILD_VERSION=\"%BUILD_VERSION%\"
+        shell: msys2 {0}
+        run: |
+          gcc src/main.c src/app.c src/downloader.c src/config.c src/release_store.c resources/app.rc \
+            -o version-download-tool.exe \
+            -mwindows \
+            -lcomctl32 \
+            -lwinhttp \
+            -lole32 \
+            -lshell32 \
+            -D BUILD_VERSION=\"${BUILD_VERSION}\"
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
