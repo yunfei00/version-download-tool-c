@@ -4,7 +4,7 @@ setlocal
 set BUILD_VERSION=local
 
 echo Building version-download-tool.exe ...
-gcc src\main.c src\app.c src\downloader.c src\config.c resources\app.rc -o version-download-tool.exe -mwindows -lcomctl32 -lwinhttp -D BUILD_VERSION=\"%BUILD_VERSION%\"
+gcc src\main.c src\app.c src\downloader.c src\config.c src\release_store.c resources\app.rc -o version-download-tool.exe -mwindows -lcomctl32 -lwinhttp -lole32 -lshell32 -D BUILD_VERSION=\"%BUILD_VERSION%\"
 if errorlevel 1 (
   echo Build failed.
   exit /b 1

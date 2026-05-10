@@ -5,6 +5,7 @@
 #include <commctrl.h>
 #include "downloader.h"
 #include "config.h"
+#include "version.h"
 
 #define APP_WIDTH 1080
 #define APP_HEIGHT 640
