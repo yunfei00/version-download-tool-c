@@ -3,22 +3,25 @@
 
 #include <windows.h>
 
-#define MAX_RELEASE_ASSETS 256
+#define MAX_DOWNLOAD_ITEMS 1000
 
 typedef struct {
-    char version[128];
+    char url[2048];
     char file_name[260];
-    char size_text[64];
-    char published_at[64];
-    char download_url[1024];
-    DWORD size_bytes;
+    char save_path[MAX_PATH];
+    unsigned long long size_bytes;
+    unsigned long long downloaded_bytes;
+    int progress;
     char status[64];
-} ReleaseAsset;
+} DownloadItem;
 
-typedef void (*DownloadProgressCallback)(int progress, DWORD total, DWORD expected, void* user_data);
-typedef BOOL (*DownloadCancelCallback)(void* user_data);
+typedef void (*HttpDownloadProgressCallback)(unsigned long long downloaded, unsigned long long total, void* user_data);
+typedef BOOL (*HttpDownloadCancelCallback)(void* user_data);
 
-BOOL github_fetch_releases(const char* repo, ReleaseAsset* assets, int max_assets, int* out_count, char* error_buf, int error_buf_size);
-BOOL github_download_file(const char* url, const char* file_path, DWORD expected_size, DownloadProgressCallback progress_cb, DownloadCancelCallback cancel_cb, void* user_data, BOOL* was_cancelled, char* error_buf, int error_buf_size);
+BOOL http_get_text(const char* url, char* buffer, int buffer_size);
+unsigned long long http_get_file_size(const char* url);
+BOOL http_download_file(const char* url, const char* save_path, HttpDownloadProgressCallback callback, HttpDownloadCancelCallback cancel_cb, void* user_data);
+int http_scan_directory(const char* url, DownloadItem* items, int max_items);
+void parse_file_name_from_url(const char* url, char* out_name, int out_size);
 
 #endif
